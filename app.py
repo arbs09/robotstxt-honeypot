@@ -62,7 +62,7 @@ def handle_bad_bots(ip, user_agent, path):
 
 @app.errorhandler(404)
 def handle_404(e):
-    ip = request.remote_addr
+    ip = request.headers.get('X-Real-IP', request.remote_addr)
     user_agent = request.headers.get('User-Agent', 'Unknown')
     path = request.path
 
