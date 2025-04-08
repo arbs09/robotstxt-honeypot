@@ -1,4 +1,4 @@
-# a web-honeypot
+# robotstxt-honeypot
 
 There are some Crawlers oput there, wich don't respect robots.txt.
 This Honeypot tries to find them and report them via some ways.
@@ -10,8 +10,8 @@ This Honeypot tries to find them and report them via some ways.
 ```yml
 services:
   honeypot:
-    container_name: web-honeypot
-    image: ghcr.io/arbs09/web-honeypot:main
+    container_name: robotstxt-honeypot
+    image: ghcr.io/arbs09/robotstxt-honeypot:main
     ports:
       - 80:5000
 ```
