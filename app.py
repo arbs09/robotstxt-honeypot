@@ -55,7 +55,7 @@ def report_to_abuse_ipdb(ip, user_agent, path):
     }
     data = {
         'ip': ip,
-        'categories': '15',
+        'categories': '19',
         'comment': f"Does not respect robots.txt: {user_agent} on {path}"
     }
 
