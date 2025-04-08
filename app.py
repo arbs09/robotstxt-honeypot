@@ -54,7 +54,12 @@ def report_to_abuse_ipdb(ip, user_agent, path):
         'comment': f"Does not respect robots.txt: {user_agent} on {path}"
     }
 
-    requests.post(url, headers=headers, data=data)
+    try:
+        response = requests.post(url, headers=headers, data=data)
+        response.raise_for_status()
+        logging.info(f"Reported {ip} to AbuseIPDB: {response.json()}")
+    except requests.RequestException as e:
+        logging.error(f"Failed to report {ip} to AbuseIPDB: {e}")
 
 def handle_bad_bots(ip, user_agent, path):
     logging.warning(f"[HONEYPOT] Detected bad bot: {ip} - {user_agent} - {path}")
