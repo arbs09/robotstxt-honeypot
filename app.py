@@ -4,11 +4,16 @@ import logging
 import requests
 import os
 import dotenv
+import json
 
 dotenv.load_dotenv()
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
+
+if not os.getenv("ABUSEIPDB_API_KEY"):
+    logging.error("ABUSEIPDB_API_KEY is not set. Please set it in the environment variables.")
+    exit(1)
 
 ABUSEIPDB_API_KEY = os.getenv("ABUSEIPDB_API_KEY")
 abuse_ip_list = set()
