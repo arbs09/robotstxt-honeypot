@@ -22,7 +22,7 @@ REPORT_INTERVAL = 15 * 60
 
 @app.route('/robots.txt')
 def robots():
-    ip = request.remote_addr
+    ip = request.headers.get('X-Real-IP', request.remote_addr)
     user_agent = request.headers.get('User-Agent', 'Unknown')
     
     access_robotstxt[ip] = {'accessed': True, 'last_access': time.time()}
