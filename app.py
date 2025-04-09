@@ -54,11 +54,15 @@ def report_to_abuse_ipdb(ip, user_agent, path, robots):
         'Key': ABUSEIPDB_API_KEY,
         'Accept': 'application/json',
     }
-    data = {
-        'ip': ip,
-        'categories': '19',
-        'comment': f"Does not respect robots.txt: {user_agent} on {path}"
-    }
+
+    if robots == True:
+        comment =f"Does not respect robots.txt: {user_agent} on {path}"
+
+        data = {
+            'ip': ip,
+            'categories': '19',
+            'comment': comment
+        }
 
         try:
             response = requests.post(url, headers=headers, data=data)
@@ -86,4 +90,3 @@ def handle_404(e):
 
     handle_bad_bots(ip, user_agent, path)
     return "", 200
-
