@@ -16,7 +16,7 @@ if not os.getenv("ABUSEIPDB_API_KEY"):
     exit(1)
 
 ABUSEIPDB_API_KEY = os.getenv("ABUSEIPDB_API_KEY")
-abuse_ip_list = set()
+access_robotstxt = {}
 last_ip_report_time = {}
 REPORT_INTERVAL = 15 * 60
 
@@ -24,7 +24,8 @@ REPORT_INTERVAL = 15 * 60
 def robots():
     ip = request.remote_addr
     user_agent = request.headers.get('User-Agent', 'Unknown')
-    path = request.path
+    
+    access_robotstxt[ip] = {'accessed': True, 'last_access': time.time()}
 
     logging.info(f"Access to robots.txt from {ip} - {user_agent}")
 
@@ -36,7 +37,7 @@ def robots():
 def not_suspicious():
     return "get out", 200
 
-def report_to_abuse_ipdb(ip, user_agent, path):
+def report_to_abuse_ipdb(ip, user_agent, path, robots):
     now = time.time()
     last_report = last_ip_report_time.get(ip, 0)
 
@@ -53,22 +54,33 @@ def report_to_abuse_ipdb(ip, user_agent, path):
         'Key': ABUSEIPDB_API_KEY,
         'Accept': 'application/json',
     }
-    data = {
-        'ip': ip,
-        'categories': '15',
-        'comment': f"Does not respect robots.txt: {user_agent} on {path}"
-    }
 
-    try:
-        response = requests.post(url, headers=headers, data=data)
-        response.raise_for_status()
-        logging.info(f"Reported {ip} to AbuseIPDB: {response.json()}")
-    except requests.RequestException as e:
-        logging.error(f"Failed to report {ip} to AbuseIPDB: {e}")
+    if robots == True:
+        comment =f"Does not respect robots.txt: {user_agent} on {path}"
+
+        data = {
+            'ip': ip,
+            'categories': '15',
+            'comment': comment
+        }
+
+        try:
+            response = requests.post(url, headers=headers, data=data)
+            response.raise_for_status()
+            logging.info(f"Reported {ip} to AbuseIPDB: {response.json()}")
+        except requests.RequestException as e:
+            logging.error(f"Failed to report {ip} to AbuseIPDB: {e}")
+    else:
+        return
 
 def handle_bad_bots(ip, user_agent, path):
     logging.warning(f"[HONEYPOT] Detected bad bot: {ip} - {user_agent} - {path}")
-    report_to_abuse_ipdb(ip, user_agent, path)
+
+    if ip in access_robotstxt:
+        report_to_abuse_ipdb(ip, user_agent, path, robots=True)
+    else:
+        report_to_abuse_ipdb(ip, user_agent, path, robots=False)
+        return
 
 @app.errorhandler(404)
 def handle_404(e):
